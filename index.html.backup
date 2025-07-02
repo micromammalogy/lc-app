@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zonos Shipping Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .section { margin: 30px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .section h2 { color: #333; margin-bottom: 15px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007cba; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #005a87; }
+        .item-card { border: 1px solid #eee; padding: 15px; margin: 10px 0; border-radius: 4px; background: #f9f9f9; }
+        .add-btn { background: #28a745; margin: 10px 0; }
+        .add-btn:hover { background: #218838; }
+        .response { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>Zonos Shipping Calculator</h1>
+    
+    <form id="shippingForm">
+        <div class="section">
+            <h2>API Credentials</h2>
+            <div class="form-group">
+                <label>Credential Token *</label>
+                <input type="text" id="credentialToken" required>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Items</h2>
+            <div id="itemsContainer"></div>
+            <button type="button" class="add-btn" onclick="addItem()">+ Add Item</button>
+        </div>
+
+        <div class="section">
+            <h2>Ship From</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name *</label>
+                    <input type="text" id="fromFirstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name *</label>
+                    <input type="text" id="fromLastName" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="fromEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" id="fromPhone" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Country *</label>
+                <select id="fromCountry" required>
+                    <option value="">Select Country</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="AU">Australia</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Address Line 1 *</label>
+                <input type="text" id="fromAddressLine1" required>
+            </div>
+            <div class="form-group">
+                <label>Address Line 2</label>
+                <input type="text" id="fromAddressLine2">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>City *</label>
+                    <input type="text" id="fromCity" required>
+                </div>
+                <div class="form-group">
+                    <label>State/Province</label>
+                    <input type="text" id="fromState">
+                </div>
+                <div class="form-group">
+                    <label>ZIP *</label>
+                    <input type="text" id="fromZip" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Ship To</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name *</label>
+                    <input type="text" id="toFirstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name *</label>
+                    <input type="text" id="toLastName" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="toEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" id="toPhone" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Country *</label>
+                <select id="toCountry" required>
+                    <option value="">Select Country</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="AU">Australia</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Address Line 1 *</label>
+                <input type="text" id="toAddressLine1" required>
+            </div>
+            <div class="form-group">
+                <label>Address Line 2</label>
+                <input type="text" id="toAddressLine2">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>City *</label>
+                    <input type="text" id="toCity" required>
+                </div>
+                <div class="form-group">
+                    <label>State/Province</label>
+                    <input type="text" id="toState">
+                </div>
+                <div class="form-group">
+                    <label>ZIP *</label>
+                    <input type="text" id="toZip" required>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Calculate Shipping & Landed Costs</button>
+    </form>
+
+    <div id="response" class="response" style="display: none;"></div>
+
+    <script>
+        let itemCount = 0;
+
+        function addItem() {
+            itemCount++;
+            const container = document.getElementById('itemsContainer');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item-card';
+            itemDiv.innerHTML = `
+                <h3>Item ${itemCount}</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="itemName-${itemCount}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Product ID *</label>
+                        <input type="text" id="itemProductId-${itemCount}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="itemDescription-${itemCount}" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cost *</label>
+                        <input type="number" id="itemCost-${itemCount}" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Currency *</label>
+                        <select id="itemCurrency-${itemCount}" required>
+                            <option value="USD">USD</option>
+                            <option value="CAD">CAD</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity *</label>
+                        <input type="number" id="itemQuantity-${itemCount}" value="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Weight (lbs) *</label>
+                        <input type="number" id="itemWeight-${itemCount}" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Country of Origin</label>
+                        <select id="itemCountryOfOrigin-${itemCount}">
+                            <option value="">Optional</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Length (cm)</label>
+                        <input type="number" id="itemLength-${itemCount}" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Width (cm)</label>
+                        <input type="number" id="itemWidth-${itemCount}" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="itemHeight-${itemCount}" step="0.01">
+                    </div>
+                </div>
+            `;
+            container.appendChild(itemDiv);
+        }
+
+        addItem();
+
+        document.getElementById('shippingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'block';
+            responseDiv.innerHTML = 'Processing...';
+            
+            try {
+                const formData = collectFormData();
+                const mutation = buildMutation(formData);
+                
+                const response = await fetch('/api/zonos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        credentialToken: formData.credentialToken,
+                        mutation: mutation
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    responseDiv.className = 'response success';
+                    responseDiv.innerHTML = `
+                        <h3>Success!</h3>
+                        <p>Response saved to: ${result.savedTo}</p>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    `;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `<h3>Error:</h3><p>${result.error}</p>`;
+                }
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `<h3>Error:</h3><p>${error.message}</p>`;
+            }
+        });
+
+        function collectFormData() {
+            return {
+                credentialToken: document.getElementById('credentialToken').value,
+                shipFrom: {
+                    firstName: document.getElementById('fromFirstName').value,
+                    lastName: document.getElementById('fromLastName').value,
+                    email: document.getElementById('fromEmail').value,
+                    phone: document.getElementById('fromPhone').value,
+                    country: document.getElementById('fromCountry').value,
+                    addressLine1: document.getElementById('fromAddressLine1').value,
+                    addressLine2: document.getElementById('fromAddressLine2').value,
+                    city: document.getElementById('fromCity').value,
+                    state: document.getElementById('fromState').value,
+                    zip: document.getElementById('fromZip').value
+                },
+                shipTo: {
+                    firstName: document.getElementById('toFirstName').value,
+                    lastName: document.getElementById('toLastName').value,
+                    email: document.getElementById('toEmail').value,
+                    phone: document.getElementById('toPhone').value,
+                    country: document.getElementById('toCountry').value,
+                    addressLine1: document.getElementById('toAddressLine1').value,
+                    addressLine2: document.getElementById('toAddressLine2').value,
+                    city: document.getElementById('toCity').value,
+                    state: document.getElementById('toState').value,
+                    zip: document.getElementById('toZip').value
+                },
+                items: getItems()
+            };
+        }
+
+        function getItems() {
+            const items = [];
+            for (let i = 1; i <= itemCount; i++) {
+                const name = document.getElementById(`itemName-${i}`);
+                if (name && name.value) {
+                    items.push({
+                        name: name.value,
+                        productId: document.getElementById(`itemProductId-${i}`).value,
+                        description: document.getElementById(`itemDescription-${i}`).value,
+                        cost: parseFloat(document.getElementById(`itemCost-${i}`).value),
+                        currency: document.getElementById(`itemCurrency-${i}`).value,
+                        quantity: parseInt(document.getElementById(`itemQuantity-${i}`).value),
+                        weight: parseFloat(document.getElementById(`itemWeight-${i}`).value),
+                        countryOfOrigin: document.getElementById(`itemCountryOfOrigin-${i}`).value,
+                        length: parseFloat(document.getElementById(`itemLength-${i}`).value) || null,
+                        width: parseFloat(document.getElementById(`itemWidth-${i}`).value) || null,
+                        height: parseFloat(document.getElementById(`itemHeight-${i}`).value) || null
+                    });
+                }
+            }
+            return items;
+        }
+
+        function buildMutation(data) {
+            const parties = [
+                {
+                    type: "ORIGIN",
+                    location: {
+                        countryCode: data.shipFrom.country,
+                        line1: data.shipFrom.addressLine1,
+                        line2: data.shipFrom.addressLine2 || undefined,
+                        locality: data.shipFrom.city,
+                        administrativeAreaCode: data.shipFrom.state || undefined,
+                        postalCode: data.shipFrom.zip
+                    }
+                },
+                {
+                    type: "DESTINATION",
+                    location: {
+                        countryCode: data.shipTo.country,
+                        line1: data.shipTo.addressLine1,
+                        line2: data.shipTo.addressLine2 || undefined,
+                        locality: data.shipTo.city,
+                        administrativeAreaCode: data.shipTo.state || undefined,
+                        postalCode: data.shipTo.zip
+                    },
+                    person: {
+                        firstName: data.shipTo.firstName,
+                        lastName: data.shipTo.lastName,
+                        email: data.shipTo.email,
+                        phone: data.shipTo.phone
+                    }
+                },
+                {
+                    type: "PAYOR",
+                    location: {
+                        countryCode: data.shipTo.country,
+                        line1: data.shipTo.addressLine1,
+                        line2: data.shipTo.addressLine2 || undefined,
+                        locality: data.shipTo.city,
+                        administrativeAreaCode: data.shipTo.state || undefined,
+                        postalCode: data.shipTo.zip
+                    },
+                    person: {
+                        firstName: data.shipTo.firstName,
+                        lastName: data.shipTo.lastName,
+                        email: data.shipTo.email,
+                        phone: data.shipTo.phone
+                    }
+                }
+            ];
+
+            const items = data.items.map(item => {
+                const measurements = [
+                    { type: "WEIGHT", value: item.weight, unitOfMeasure: "POUND" }
+                ];
+
+                if (item.length) measurements.push({ type: "LENGTH", value: item.length, unitOfMeasure: "CENTIMETER" });
+                if (item.width) measurements.push({ type: "WIDTH", value: item.width, unitOfMeasure: "CENTIMETER" });
+                if (item.height) measurements.push({ type: "HEIGHT", value: item.height, unitOfMeasure: "CENTIMETER" });
+
+                const itemData = {
+                    amount: item.cost,
+                    currencyCode: item.currency,
+                    quantity: item.quantity,
+                    productId: item.productId,
+                    description: item.description,
+                    measurements: measurements
+                };
+
+                if (item.countryOfOrigin) {
+                    itemData.countryOfOrigin = item.countryOfOrigin;
+                }
+
+                return itemData;
+            });
+
+            return {
+                query: `
+                    mutation CalculateLandedCostWithShipping(
+                        $parties: [PartyCreateWorkflowInput!]!
+                        $items: [ItemCreateWorkflowInput!]!
+                        $landedCostConfig: LandedCostWorkFlowInput!
+                    ) {
+                        partyCreateWorkflow(input: $parties) {
+                            type
+                            id
+                        }
+                        itemCreateWorkflow(input: $items) {
+                            id
+                            amount
+                        }
+                        cartonizeWorkflow {
+                            id
+                        }
+                        shipmentRatingCalculateWorkflow {
+                            id
+                            amount
+                        }
+                        landedCostCalculateWorkflow(input: $landedCostConfig) {
+                            id
+                            duties { amount currency }
+                            taxes { amount currency }
+                            fees { amount currency }
+                        }
+                    }
+                `,
+                variables: {
+                    parties: parties,
+                    items: items,
+                    landedCostConfig: {
+                        endUse: "NOT_FOR_RESALE",
+                        method: "DDP",
+                        tariffRate: "ZONOS_PREFERRED"
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zonos Shipping Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            border-radius: 16px;
+            border: 1px solid #444;
+            overflow: hidden;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: #333;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #555;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #555;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-row.two-col {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-row.three-col {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            color: #ccc;
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #1a1a1a;
+            color: #fff;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        button:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .items-section {
+            border: 2px solid #555;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #2a2a2a;
+        }
+
+        .item-card {
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #1a1a1a;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .item-number {
+            font-weight: 600;
+            color: #4CAF50;
+        }
+
+        .remove-item {
+            background: #ef4444;
+        }
+
+        .remove-item:hover {
+            background: #dc2626;
+        }
+
+        .add-item-btn {
+            background: #4CAF50;
+            margin: 10px 0;
+        }
+
+        .add-item-btn:hover {
+            background: #45a049;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response {
+            margin-top: 20px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            border: 1px solid #444;
+            overflow: hidden;
+        }
+
+        .error {
+            background: #5a1a1a;
+            color: #ff6b6b;
+            padding: 15px;
+            border: 1px solid #8b0000;
+        }
+
+        .success {
+            background: #2a2a2a;
+        }
+        
+        .response-header {
+            background: #333;
+            padding: 15px;
+            border-bottom: 1px solid #555;
+        }
+
+        .response-content {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .breakdown-panel {
+            flex: 1;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .api-panel {
+            width: 400px;
+            background: #2d2d2d;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-tabs {
+            display: flex;
+            background: #3d3d3d;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            background: #3d3d3d;
+            color: #ccc;
+            border: none;
+        }
+
+        .tab.active {
+            background: #2d2d2d;
+            color: #fff;
+        }
+
+        .tab-content {
+            flex: 1;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .cart-section {
+            margin-bottom: 30px;
+        }
+
+        .cart-item {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .item-name {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .item-price {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .item-details {
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        .breakdown-section {
+            margin-bottom: 30px;
+        }
+
+        .breakdown-header {
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .breakdown-category {
+            margin-bottom: 20px;
+        }
+
+        .category-header {
+            background: #333;
+            padding: 12px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #555;
+        }
+
+        .category-header:hover {
+            background: #3a3a3a;
+        }
+
+        .category-title {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .category-amount {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .category-details {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            display: none;
+        }
+
+        .category-details.expanded {
+            display: block;
+        }
+
+        .detail-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #ccc;
+        }
+
+        .detail-amount {
+            color: #fff;
+        }
+        
+        .total-section {
+            background: #333;
+            padding: 15px;
+            border-radius: 6px;
+            border: 2px solid #555;
+        }
+
+        .total-label {
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .total-amount {
+            color: #4CAF50;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .chevron {
+            transition: transform 0.2s;
+        }
+
+        .chevron.expanded {
+            transform: rotate(90deg);
+        }
+
+        /* Token save/remove specific styles */
+        #tokenSavedSection {
+            background: #1a4a1a;
+            border: 1px solid #4CAF50;
+        }
+
+        #tokenSavedSection span {
+            color: #4CAF50;
+        }
+
+        #removeToken {
+            background: #ef4444;
+        }
+
+        #saveToken {
+            background: #4CAF50;
+        }
+
+        /* Default button styles */
+        .default-btn {
+            background: #17a2b8;
+            font-size: 12px;
+        }
+
+        .default-btn:hover {
+            background: #138496;
+        }
+
+        @media (max-width: 768px) {
+            .form-row.two-col,
+            .form-row.three-col {
+                grid-template-columns: 1fr;
+            }
+            
+            .response-content {
+                flex-direction: column;
+            }
+            
+            .api-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <svg class="logo" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <style>
+                    .logo-text { fill: white; font-family: Arial, sans-serif; font-weight: bold; }
+                    .logo-circle { fill: none; stroke: white; stroke-width: 2; }
+                    .logo-target { fill: white; }
+                </style>
+            </defs>
+            <!-- Zonos logo recreation -->
+            <circle class="logo-circle" cx="25" cy="25" r="20"/>
+            <circle class="logo-circle" cx="25" cy="25" r="15"/>
+            <circle class="logo-circle" cx="25" cy="25" r="10"/>
+            <circle class="logo-target" cx="25" cy="25" r="4"/>
+            <text x="60" y="32" class="logo-text" font-size="24">ZONOS</text>
+        </svg>
+        <h1 class="app-title">Landed Cost Calculator</h1>
+    </div>
+
+    <h1>Zonos Shipping Calculator</h1>
+    
+    <form id="shippingForm">
+        <div class="section">
+            <h2>API Credentials</h2>
+            <input type="hidden" id="hiddenCredentialToken" required>
+            <div id="tokenInputSection">
+                <div class="form-group">
+                    <label>Credential Token *</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="credentialToken" required style="flex: 1;">
+                        <button type="button" id="saveToken" style="background: #28a745; padding: 8px 16px; font-size: 14px;">Save Token</button>
+                    </div>
+                </div>
+            </div>
+            <div id="tokenSavedSection" style="display: none;">
+                <div class="form-group">
+                    <label>Credential Token</label>
+                    <div style="display: flex; gap: 10px; align-items: center; padding: 12px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
+                        <span style="color: #155724; flex: 1;">✓ Token saved and secured</span>
+                        <button type="button" id="removeToken" style="background: #dc3545; padding: 6px 12px; font-size: 14px;">Remove Token</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Items</h2>
+            <div id="itemsContainer"></div>
+            <button type="button" class="add-btn" onclick="addItem()">+ Add Item</button>
+        </div>
+
+        <div class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Ship From</h2>
+                <button type="button" onclick="loadDefaultAddress('shipFrom')" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px;">Load Default</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name *</label>
+                    <input type="text" id="fromFirstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name *</label>
+                    <input type="text" id="fromLastName" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="fromEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" id="fromPhone" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Country *</label>
+                <select id="fromCountry" required onchange="updateFromStateOptions()">
+                    <option value="">Select Country</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="BR">Brazil</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="AU">Australia</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Address Line 1 *</label>
+                <input type="text" id="fromAddressLine1" required>
+            </div>
+            <div class="form-group">
+                <label>Address Line 2</label>
+                <input type="text" id="fromAddressLine2">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>City *</label>
+                    <input type="text" id="fromCity" required>
+                </div>
+                <div class="form-group">
+                    <label>State/Province</label>
+                    <select id="fromState" style="display: none;">
+                        <option value="">Select State/Province</option>
+                    </select>
+                    <input type="text" id="fromStateText" placeholder="Enter state/province code">
+                </div>
+                <div class="form-group">
+                    <label>ZIP *</label>
+                    <input type="text" id="fromZip" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Ship To</h2>
+                <button type="button" onclick="loadDefaultAddress('shipTo')" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px;">Load Default</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name *</label>
+                    <input type="text" id="toFirstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name *</label>
+                    <input type="text" id="toLastName" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="toEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" id="toPhone" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Country *</label>
+                <select id="toCountry" required onchange="updateToStateOptions()">
+                    <option value="">Select Country</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="BR">Brazil</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="AU">Australia</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Address Line 1 *</label>
+                <input type="text" id="toAddressLine1" required>
+            </div>
+            <div class="form-group">
+                <label>Address Line 2</label>
+                <input type="text" id="toAddressLine2">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>City *</label>
+                    <input type="text" id="toCity" required>
+                </div>
+                <div class="form-group">
+                    <label>State/Province</label>
+                    <select id="toState" style="display: none;">
+                        <option value="">Select State/Province</option>
+                    </select>
+                    <input type="text" id="toStateText" placeholder="Enter state/province code">
+                </div>
+                <div class="form-group">
+                    <label>ZIP *</label>
+                    <input type="text" id="toZip" required>
+                </div>
+            </div>
+        </div>
+
+<div class="section">
+            <h2>Landed Cost Configuration</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Sale Type *</label>
+                    <select id="endUse" required>
+                        <option value="NOT_FOR_RESALE">Not for resale</option>
+                        <option value="FOR_RESALE">For resale</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Method *</label>
+                    <select id="method" required>
+                        <option value="DDP">Duties and taxes prepaid</option>
+                        <option value="DDU">Duties and taxes unpaid</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Duty Calculation Type *</label>
+                <select id="tariffRate" required>
+                    <option value="ZONOS_PREFERRED">Zonos Preferred - Zonos will attempt to calculate best tariff rate (recommended)</option>
+                    <option value="EXACT">Exact - Exact tariff rate for provided HS code will be used</option>
+                    <option value="MAXIMUM">Maximum - Maximum tariff rate for provided HS code will be used</option>
+                    <option value="MEDIAN">Median - Median tariff rate for provided HS code will be used</option>
+                    <option value="MINIMUM">Minimum - Lowest tariff rate for provided HS code will be used</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit">Calculate Shipping & Landed Costs</button>
+    </form>
+
+    </div>
+    </div>
+
+    <div id="response" class="response" style="display: none;">
+        <div class="response-header">
+            <h3 style="margin: 0; color: #333;">Landed Cost Calculation Results</h3>
+        </div>
+        <div class="response-content">
+            <div class="breakdown-panel">
+                <div id="breakdown-content"></div>
+            </div>
+            <div class="api-panel">
+                <div class="panel-tabs">
+                    <button class="tab active" onclick="switchTab('shipping')">Shipping</button>
+                    <button class="tab" onclick="switchTab('api')">API details</button>
+                </div>
+                <div id="shipping-content" class="tab-content"></div>
+                <div id="api-content" class="tab-content" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+        <div class="response-content">
+            <div class="breakdown-panel">
+                <div id="breakdown-content"></div>
+            </div>
+            <div class="api-panel">
+                <div class="panel-tabs">
+                    <button class="tab active" onclick="switchTab('shipping')">Shipping</button>
+                    <button class="tab" onclick="switchTab('api')">API details</button>
+                </div>
+                <div id="shipping-content" class="tab-content"></div>
+                <div id="api-content" class="tab-content" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let savedToken = '';
+
+        const defaultAddresses = {
+            shipFrom: {
+                firstName: "claude", lastName: "test", email: "test@gmail.com", phone: "9093559255",
+                country: "US", addressLine1: "7213 oklahoma ave", addressLine2: "", 
+                city: "fontana", state: "CA", zip: "92336"
+            },
+            shipTo: {
+                firstName: "ca", lastName: "test", email: "test@gmail.com", phone: "9093559255",
+                country: "CA", addressLine1: "1234 hornby st", addressLine2: "",
+                city: "vancouver", state: "BC", zip: "V5L 4S1"
+            }
+        };
+
+        const defaultItem = {
+            name: "shoes", productId: "56487", description: "men's leather shoes",
+            cost: "150", currency: "USD", quantity: "1", weight: "2",
+            countryOfOrigin: "", length: "10", width: "10", height: "10"
+        };
+
+        function loadDefaultAddress(type) {
+            const address = defaultAddresses[type];
+            const prefix = type === 'shipFrom' ? 'from' : 'to';
+            
+            document.getElementById(prefix + 'FirstName').value = address.firstName;
+            document.getElementById(prefix + 'LastName').value = address.lastName;
+            document.getElementById(prefix + 'Email').value = address.email;
+            document.getElementById(prefix + 'Phone').value = address.phone;
+            document.getElementById(prefix + 'Country').value = address.country;
+            document.getElementById(prefix + 'AddressLine1').value = address.addressLine1;
+            document.getElementById(prefix + 'AddressLine2').value = address.addressLine2;
+            document.getElementById(prefix + 'City').value = address.city;
+            document.getElementById(prefix + 'Zip').value = address.zip;
+            
+            if (type === 'shipFrom') {
+                updateFromStateOptions();
+                setTimeout(() => {
+                    const stateSelect = document.getElementById('fromState');
+                    if (stateSelect.style.display !== 'none') {
+                        stateSelect.value = address.state;
+                    } else {
+                        document.getElementById('fromStateText').value = address.state;
+                    }
+                }, 100);
+            } else {
+                updateToStateOptions();
+                setTimeout(() => {
+                    const stateSelect = document.getElementById('toState');
+                    if (stateSelect.style.display !== 'none') {
+                        stateSelect.value = address.state;
+                    } else {
+                        document.getElementById('toStateText').value = address.state;
+                    }
+                }, 100);
+            }
+        }
+
+        function loadDefaultItem(itemNumber) {
+            document.getElementById(`itemName-${itemNumber}`).value = defaultItem.name;
+            document.getElementById(`itemProductId-${itemNumber}`).value = defaultItem.productId;
+            document.getElementById(`itemDescription-${itemNumber}`).value = defaultItem.description;
+            document.getElementById(`itemCost-${itemNumber}`).value = defaultItem.cost;
+            document.getElementById(`itemCurrency-${itemNumber}`).value = defaultItem.currency;
+            document.getElementById(`itemQuantity-${itemNumber}`).value = defaultItem.quantity;
+            document.getElementById(`itemWeight-${itemNumber}`).value = defaultItem.weight;
+            document.getElementById(`itemCountryOfOrigin-${itemNumber}`).value = defaultItem.countryOfOrigin;
+            document.getElementById(`itemLength-${itemNumber}`).value = defaultItem.length;
+            document.getElementById(`itemWidth-${itemNumber}`).value = defaultItem.width;
+            document.getElementById(`itemHeight-${itemNumber}`).value = defaultItem.height;
+        }
+
+        window.addEventListener('load', async function() {
+            try {
+                const response = await fetch('/api/settings');
+                const settings = await response.json();
+                if (settings.credentialToken) {
+                    savedToken = settings.credentialToken;
+                    document.getElementById('hiddenCredentialToken').value = settings.credentialToken;
+                    showSavedTokenState();
+                }
+            } catch (error) {
+                console.log('No saved settings found');
+            }
+        });
+
+        document.getElementById('saveToken').addEventListener('click', async function() {
+            const token = document.getElementById('credentialToken').value.trim();
+            if (!token) {
+                alert('Please enter a credential token first');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credentialToken: token })
+                });
+
+                if (response.ok) {
+                    savedToken = token;
+                    document.getElementById('hiddenCredentialToken').value = token;
+                    showSavedTokenState();
+                } else {
+                    alert('Failed to save token');
+                }
+            } catch (error) {
+                alert('Could not save credential token: ' + error.message);
+            }
+        });
+
+        document.getElementById('removeToken').addEventListener('click', async function() {
+            if (confirm('Are you sure you want to remove the saved credential token?')) {
+                try {
+                    await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ credentialToken: '' })
+                    });
+
+                    savedToken = '';
+                    document.getElementById('hiddenCredentialToken').value = '';
+                    showInputTokenState();
+                } catch (error) {
+                    alert('Could not remove credential token: ' + error.message);
+                }
+            }
+        });
+
+        function showSavedTokenState() {
+            document.getElementById('tokenInputSection').style.display = 'none';
+            document.getElementById('tokenSavedSection').style.display = 'block';
+            document.getElementById('credentialToken').required = false;
+        }
+
+        function showInputTokenState() {
+            document.getElementById('tokenInputSection').style.display = 'block';
+            document.getElementById('tokenSavedSection').style.display = 'none';
+            document.getElementById('credentialToken').value = '';
+            document.getElementById('credentialToken').required = true;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`button[onclick="switchTab('${tab}')"]`).classList.add('active');
+            
+            document.getElementById('shipping-content').style.display = tab === 'shipping' ? 'block' : 'none';
+            document.getElementById('api-content').style.display = tab === 'api' ? 'block' : 'none';
+        }
+
+        function toggleCategory(categoryId) {
+            const details = document.getElementById(categoryId);
+            const chevron = document.querySelector(`[onclick="toggleCategory('${categoryId}')"] .chevron`);
+            
+            if (details.classList.contains('expanded')) {
+                details.classList.remove('expanded');
+                chevron.classList.remove('expanded');
+            } else {
+                details.classList.add('expanded');
+                chevron.classList.add('expanded');
+            }
+        }
+
+        function displayLandedCostBreakdown(data) {
+            console.log('displayLandedCostBreakdown called with:', data);
+            
+            const breakdownContent = document.getElementById('breakdown-content');
+            const shippingContent = document.getElementById('shipping-content');
+            const apiContent = document.getElementById('api-content');
+            
+            if (!breakdownContent || !shippingContent || !apiContent) {
+                console.error('Response display elements not found');
+                return;
+            }
+            
+            // Display raw API response
+            apiContent.textContent = JSON.stringify(data, null, 2);
+            
+            // Extract data from API response
+            const items = data.itemCreateWorkflow || [];
+            const shipmentRating = data.shipmentRatingCalculateWorkflow?.[0] || {};
+            const landedCost = data.landedCostCalculateWorkflow?.[0] || {};
+            
+            let totalAmount = 0;
+            let shippingAmount = Math.abs(shipmentRating.amount || 0);
+            let dutiesAmount = 0;
+            let taxesAmount = 0;
+            let feesAmount = 0;
+            
+            if (landedCost.duties) {
+                dutiesAmount = landedCost.duties.reduce((sum, duty) => sum + (duty.amount || 0), 0);
+            }
+            if (landedCost.taxes) {
+                taxesAmount = landedCost.taxes.reduce((sum, tax) => sum + (tax.amount || 0), 0);
+            }
+            if (landedCost.fees) {
+                feesAmount = landedCost.fees.reduce((sum, fee) => sum + (fee.amount || 0), 0);
+            }
+            
+            const itemsTotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
+            totalAmount = itemsTotal + shippingAmount + dutiesAmount + taxesAmount + feesAmount;
+            
+            // Build cart section
+            let cartHTML = `
+                <div class="cart-section">
+                    <div class="breakdown-header">Cart</div>
+            `;
+            
+            items.forEach((item, index) => {
+                cartHTML += `
+                    <div class="cart-item">
+                        <div class="item-header">
+                            <span class="item-name">Item ${index + 1}</span>
+                            <span class="item-price">$${(item.amount || 0).toFixed(2)} USD</span>
+                        </div>
+                        <div class="item-details">ID: ${item.id}</div>
+                    </div>
+                `;
+            });
+            
+            cartHTML += `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="detail-label">Cart subtotal (${items.length} item${items.length !== 1 ? 's' : ''})</span>
+                            <span class="detail-amount">$${itemsTotal.toFixed(2)} USD</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Build landed cost breakdown section with expandable categories
+            let breakdownHTML = `
+                <div class="breakdown-section">
+                    <div class="breakdown-header">Landed cost breakdown</div>
+                    
+                    <div class="breakdown-category">
+                        <div class="category-header" onclick="toggleCategory('shipping-details')">
+                            <span class="category-title">Shipping</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="category-amount">$${shippingAmount.toFixed(2)} USD</span>
+                                <span class="chevron">▶</span>
+                            </div>
+                        </div>
+                        <div class="category-details" id="shipping-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Shipping charge</span>
+                                <span class="detail-amount">$${shippingAmount.toFixed(2)} USD</span>
+                            </div>
+                        </div>
+                    </div>
+            `;
+            
+            if (dutiesAmount > 0) {
+                breakdownHTML += `
+                    <div class="breakdown-category">
+                        <div class="category-header" onclick="toggleCategory('duties-details')">
+                            <span class="category-title">Duties</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="category-amount">$${dutiesAmount.toFixed(2)} USD</span>
+                                <span class="chevron">▶</span>
+                            </div>
+                        </div>
+                        <div class="category-details" id="duties-details">
+                `;
+                
+                if (landedCost.duties) {
+                    landedCost.duties.forEach((duty, index) => {
+                        breakdownHTML += `
+                            <div class="detail-item">
+                                <span class="detail-label">Duty ${index + 1}</span>
+                                <span class="detail-amount">$${(duty.amount || 0).toFixed(2)} ${duty.currency || 'USD'}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                breakdownHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (taxesAmount > 0) {
+                breakdownHTML += `
+                    <div class="breakdown-category">
+                        <div class="category-header" onclick="toggleCategory('taxes-details')">
+                            <span class="category-title">Taxes</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="category-amount">$${taxesAmount.toFixed(2)} USD</span>
+                                <span class="chevron">▶</span>
+                            </div>
+                        </div>
+                        <div class="category-details" id="taxes-details">
+                `;
+                
+                if (landedCost.taxes) {
+                    landedCost.taxes.forEach((tax, index) => {
+                        breakdownHTML += `
+                            <div class="detail-item">
+                                <span class="detail-label">Tax ${index + 1}</span>
+                                <span class="detail-amount">$${(tax.amount || 0).toFixed(2)} ${tax.currency || 'USD'}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                breakdownHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (feesAmount > 0) {
+                breakdownHTML += `
+                    <div class="breakdown-category">
+                        <div class="category-header" onclick="toggleCategory('fees-details')">
+                            <span class="category-title">Fees</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="category-amount">$${feesAmount.toFixed(2)} USD</span>
+                                <span class="chevron">▶</span>
+                            </div>
+                        </div>
+                        <div class="category-details" id="fees-details">
+                `;
+                
+                if (landedCost.fees) {
+                    landedCost.fees.forEach((fee, index) => {
+                        breakdownHTML += `
+                            <div class="detail-item">
+                                <span class="detail-label">Fee ${index + 1}</span>
+                                <span class="detail-amount">$${(fee.amount || 0).toFixed(2)} ${fee.currency || 'USD'}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                breakdownHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            breakdownHTML += `
+                    <div class="total-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="total-label">Total</span>
+                            <span class="total-amount">$${totalAmount.toFixed(2)} USD</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Set shipping content
+            if (shippingContent) {
+                shippingContent.textContent = `Shipping: $${shippingAmount.toFixed(2)} USD`;
+            }
+            
+            // Display everything
+            breakdownContent.innerHTML = cartHTML + breakdownHTML;
+        }
+
+        const stateProvinceData = {
+            US: {
+                'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
+                'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'District of Columbia': 'DC',
+                'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL',
+                'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA',
+                'Maine': 'ME', 'Maryland': 'MD', 'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN',
+                'Mississippi': 'MS', 'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV',
+                'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY',
+                'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 'Oregon': 'OR',
+                'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD',
+                'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT', 'Virginia': 'VA',
+                'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
+            },
+            CA: {
+                'Alberta': 'AB', 'British Columbia': 'BC', 'Manitoba': 'MB', 'New Brunswick': 'NB',
+                'Newfoundland and Labrador': 'NL', 'Northwest Territories': 'NT', 'Nova Scotia': 'NS',
+                'Nunavut': 'NU', 'Ontario': 'ON', 'Prince Edward Island': 'PE', 'Quebec': 'QC',
+                'Saskatchewan': 'SK', 'Yukon': 'YT'
+            },
+            BR: {
+                'Acre': 'AC', 'Alagoas': 'AL', 'Amapá': 'AP', 'Amazonas': 'AM', 'Bahia': 'BA',
+                'Ceará': 'CE', 'Distrito Federal': 'DF', 'Espírito Santo': 'ES', 'Goiás': 'GO',
+                'Maranhão': 'MA', 'Mato Grosso': 'MT', 'Mato Grosso do Sul': 'MS', 'Minas Gerais': 'MG',
+                'Pará': 'PA', 'Paraíba': 'PB', 'Paraná': 'PR', 'Pernambuco': 'PE', 'Piauí': 'PI',
+                'Rio de Janeiro': 'RJ', 'Rio Grande do Norte': 'RN', 'Rio Grande do Sul': 'RS',
+                'Rondônia': 'RO', 'Roraima': 'RR', 'Santa Catarina': 'SC', 'São Paulo': 'SP',
+                'Sergipe': 'SE', 'Tocantins': 'TO'
+            }
+        };
+
+        function updateFromStateOptions() {
+            const countrySelect = document.getElementById('fromCountry');
+            const stateSelect = document.getElementById('fromState');
+            const stateText = document.getElementById('fromStateText');
+            const country = countrySelect.value;
+            
+            if (country && stateProvinceData[country]) {
+                stateSelect.innerHTML = '<option value="">Select State/Province</option>';
+                Object.keys(stateProvinceData[country]).forEach(stateName => {
+                    const option = document.createElement('option');
+                    option.value = stateProvinceData[country][stateName];
+                    option.textContent = stateName;
+                    stateSelect.appendChild(option);
+                });
+                stateSelect.style.display = 'block';
+                stateText.style.display = 'none';
+            } else {
+                stateSelect.style.display = 'none';
+                stateText.style.display = 'block';
+            }
+        }
+
+        function updateToStateOptions() {
+            const countrySelect = document.getElementById('toCountry');
+            const stateSelect = document.getElementById('toState');
+            const stateText = document.getElementById('toStateText');
+            const country = countrySelect.value;
+            
+            if (country && stateProvinceData[country]) {
+                stateSelect.innerHTML = '<option value="">Select State/Province</option>';
+                Object.keys(stateProvinceData[country]).forEach(stateName => {
+                    const option = document.createElement('option');
+                    option.value = stateProvinceData[country][stateName];
+                    option.textContent = stateName;
+                    stateSelect.appendChild(option);
+                });
+                stateSelect.style.display = 'block';
+                stateText.style.display = 'none';
+            } else {
+                stateSelect.style.display = 'none';
+                stateText.style.display = 'block';
+            }
+        }
+
+        let itemCount = 0;
+
+        function addItem() {
+            itemCount++;
+            const container = document.getElementById('itemsContainer');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item-card';
+            itemDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">Item ${itemCount}</h3>
+                    <button type="button" onclick="loadDefaultItem(${itemCount})" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Load Default</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="itemName-${itemCount}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Product ID *</label>
+                        <input type="text" id="itemProductId-${itemCount}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="itemDescription-${itemCount}" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cost *</label>
+                        <input type="number" id="itemCost-${itemCount}" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Currency *</label>
+                        <select id="itemCurrency-${itemCount}" required>
+                            <option value="USD">USD</option>
+                            <option value="CAD">CAD</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity *</label>
+                        <input type="number" id="itemQuantity-${itemCount}" value="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Weight (lbs) *</label>
+                        <input type="number" id="itemWeight-${itemCount}" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Country of Origin</label>
+                        <select id="itemCountryOfOrigin-${itemCount}">
+                            <option value="">Optional</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Length (cm)</label>
+                        <input type="number" id="itemLength-${itemCount}" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Width (cm)</label>
+                        <input type="number" id="itemWidth-${itemCount}" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="itemHeight-${itemCount}" step="0.01">
+                    </div>
+                </div>
+            `;
+            container.appendChild(itemDiv);
+        }
+
+        addItem();
+
+        document.getElementById('shippingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'block';
+            responseDiv.innerHTML = 'Processing...';
+            
+            try {
+                const formData = collectFormData();
+                const mutation = buildMutation(formData);
+                
+                const response = await fetch('/api/zonos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        credentialToken: formData.credentialToken,
+                        mutation: mutation
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    responseDiv.className = 'response success';
+                    displayLandedCostBreakdown(result.data);
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `<h3>Error:</h3><p>${result.error}</p>`;
+                }
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `<h3>Error:</h3><p>${error.message}</p>`;
+            }
+        });
+
+        function collectFormData() {
+            return {
+                credentialToken: savedToken || document.getElementById('credentialToken').value,
+                shipFrom: {
+                    firstName: document.getElementById('fromFirstName').value,
+                    lastName: document.getElementById('fromLastName').value,
+                    email: document.getElementById('fromEmail').value,
+                    phone: document.getElementById('fromPhone').value,
+                    country: document.getElementById('fromCountry').value,
+                    addressLine1: document.getElementById('fromAddressLine1').value,
+                    addressLine2: document.getElementById('fromAddressLine2').value,
+                    city: document.getElementById('fromCity').value,
+                    state: getStateValue('from'),
+                    zip: document.getElementById('fromZip').value
+                },
+                shipTo: {
+                    firstName: document.getElementById('toFirstName').value,
+                    lastName: document.getElementById('toLastName').value,
+                    email: document.getElementById('toEmail').value,
+                    phone: document.getElementById('toPhone').value,
+                    country: document.getElementById('toCountry').value,
+                    addressLine1: document.getElementById('toAddressLine1').value,
+                    addressLine2: document.getElementById('toAddressLine2').value,
+                    city: document.getElementById('toCity').value,
+                    state: getStateValue('to'),
+                    zip: document.getElementById('toZip').value
+                },
+                items: getItems(),
+landedCostConfig: {
+                    endUse: document.getElementById('endUse').value,
+                    method: document.getElementById('method').value,
+                    tariffRate: document.getElementById('tariffRate').value
+                }
+            };
+        }
+
+        function getStateValue(prefix) {
+            const stateSelect = document.getElementById(prefix + 'State');
+            const stateText = document.getElementById(prefix + 'StateText');
+            
+            if (stateSelect.style.display !== 'none' && stateSelect.value) {
+                return stateSelect.value;
+            } else if (stateText.style.display !== 'none' && stateText.value) {
+                return stateText.value;
+            }
+            return '';
+        }
+
+        function getItems() {
+            const items = [];
+            for (let i = 1; i <= itemCount; i++) {
+                const name = document.getElementById(`itemName-${i}`);
+                if (name && name.value) {
+                    items.push({
+                        name: name.value,
+                        productId: document.getElementById(`itemProductId-${i}`).value,
+                        description: document.getElementById(`itemDescription-${i}`).value,
+                        cost: parseFloat(document.getElementById(`itemCost-${i}`).value),
+                        currency: document.getElementById(`itemCurrency-${i}`).value,
+                        quantity: parseInt(document.getElementById(`itemQuantity-${i}`).value),
+                        weight: parseFloat(document.getElementById(`itemWeight-${i}`).value),
+                        countryOfOrigin: document.getElementById(`itemCountryOfOrigin-${i}`).value,
+                        length: parseFloat(document.getElementById(`itemLength-${i}`).value) || null,
+                        width: parseFloat(document.getElementById(`itemWidth-${i}`).value) || null,
+                        height: parseFloat(document.getElementById(`itemHeight-${i}`).value) || null
+                    });
+                }
+            }
+            return items;
+        }
+
+        function buildMutation(data) {
+            const parties = [
+                {
+                    type: "ORIGIN",
+                    location: {
+                        countryCode: data.shipFrom.country,
+                        line1: data.shipFrom.addressLine1,
+                        line2: data.shipFrom.addressLine2 || undefined,
+                        locality: data.shipFrom.city,
+                        administrativeAreaCode: data.shipFrom.state || undefined,
+                        postalCode: data.shipFrom.zip
+                    }
+                },
+                {
+                    type: "DESTINATION",
+                    location: {
+                        countryCode: data.shipTo.country,
+                        line1: data.shipTo.addressLine1,
+                        line2: data.shipTo.addressLine2 || undefined,
+                        locality: data.shipTo.city,
+                        administrativeAreaCode: data.shipTo.state || undefined,
+                        postalCode: data.shipTo.zip
+                    },
+                    person: {
+                        firstName: data.shipTo.firstName,
+                        lastName: data.shipTo.lastName,
+                        email: data.shipTo.email,
+                        phone: data.shipTo.phone
+                    }
+                },
+                {
+                    type: "PAYOR",
+                    location: {
+                        countryCode: data.shipTo.country,
+                        line1: data.shipTo.addressLine1,
+                        line2: data.shipTo.addressLine2 || undefined,
+                        locality: data.shipTo.city,
+                        administrativeAreaCode: data.shipTo.state || undefined,
+                        postalCode: data.shipTo.zip
+                    },
+                    person: {
+                        firstName: data.shipTo.firstName,
+                        lastName: data.shipTo.lastName,
+                        email: data.shipTo.email,
+                        phone: data.shipTo.phone
+                    }
+                }
+            ];
+
+            const items = data.items.map(item => {
+                const measurements = [
+                    { type: "WEIGHT", value: item.weight, unitOfMeasure: "POUND" }
+                ];
+
+                if (item.length) measurements.push({ type: "LENGTH", value: item.length, unitOfMeasure: "CENTIMETER" });
+                if (item.width) measurements.push({ type: "WIDTH", value: item.width, unitOfMeasure: "CENTIMETER" });
+                if (item.height) measurements.push({ type: "HEIGHT", value: item.height, unitOfMeasure: "CENTIMETER" });
+
+                const itemData = {
+                    amount: item.cost,
+                    currencyCode: item.currency,
+                    quantity: item.quantity,
+                    productId: item.productId,
+                    description: item.description,
+                    measurements: measurements
+                };
+
+                if (item.countryOfOrigin) {
+                    itemData.countryOfOrigin = item.countryOfOrigin;
+                }
+
+                return itemData;
+            });
+
+            return {
+                query: `
+                    mutation CalculateLandedCostWithShipping(
+                        $parties: [PartyCreateWorkflowInput!]!
+                        $items: [ItemCreateWorkflowInput!]!
+                    ) {
+                        partyCreateWorkflow(input: $parties) {
+                            type
+                            id
+                        }
+                        itemCreateWorkflow(input: $items) {
+                            id
+                            amount
+                        }
+                        cartonizeWorkflow {
+                            id
+                        }
+                        shipmentRatingCalculateWorkflow {
+                            id
+                            amount
+                        }
+                        landedCostCalculateWorkflow(input: {
+                            endUse: ${data.landedCostConfig.endUse}
+                            method: ${data.landedCostConfig.method}
+                            tariffRate: ${data.landedCostConfig.tariffRate}
+                        }) {
+                            id
+                            duties { amount currency }
+                            taxes { amount currency }
+                            fees { amount currency }
+                        }
+                    }
+                `,
+                variables: {
+                    parties: parties,
+                    items: items
+                }
+            };
+        }
+    </script>
+</body>
+</html>

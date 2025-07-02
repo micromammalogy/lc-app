@@ -1,0 +1,29 @@
+        <div class="section">
+            <h2>Landed Cost Configuration</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Sale Type *</label>
+                    <select id="endUse" required>
+                        <option value="NOT_FOR_RESALE">Not for resale</option>
+                        <option value="FOR_RESALE">For resale</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Method *</label>
+                    <select id="method" required>
+                        <option value="DDP">Duties and taxes prepaid</option>
+                        <option value="DDU">Duties and taxes unpaid</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Duty Calculation Type *</label>
+                <select id="tariffRate" required>
+                    <option value="ZONOS_PREFERRED">Zonos Preferred - Zonos will attempt to calculate best tariff rate (recommended)</option>
+                    <option value="EXACT">Exact - Exact tariff rate for provided HS code will be used</option>
+                    <option value="MAXIMUM">Maximum - Maximum tariff rate for provided HS code will be used</option>
+                    <option value="MEDIAN">Median - Median tariff rate for provided HS code will be used</option>
+                    <option value="MINIMUM">Minimum - Lowest tariff rate for provided HS code will be used</option>
+                </select>
+            </div>
+        </div>
